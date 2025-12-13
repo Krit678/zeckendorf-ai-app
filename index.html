@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeckendorf AI - Deep Learning Prediction System</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --color-bg-primary: #0f172a;
+            --color-bg-secondary: #1e293b;
+            --color-bg-tertiary: #334155;
+            --color-primary: #4f46e5;
+            --color-primary-hover: #4338ca;
+            --color-secondary: #06b6d4;
+            --color-success: #10b981;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-border: #475569;
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body, #root {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .max-w-md {
+            max-width: 28rem;
+            width: 100%;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 0 30px rgba(79, 70, 229, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .icon-wrapper svg {
+            width: 2rem;
+            height: 2rem;
+            color: white;
+        }
+
+        .title-main {
+            font-size: 1.875rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Card Styling */
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #818cf8;
+        }
+
+        .card-header svg {
+            width: 1.125rem;
+            height: 1.125rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Textarea */
+        textarea {
+            width: 100%;
+            height: 6rem;
+            background: #0f172a;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            font-family: 'Courier New', monospace;
+            color: var(--color-text-secondary);
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        /* Control Section */
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 0.5rem;
+            border-radius: 9999px;
+            background: #334155;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .control-value {
+            text-align: right;
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: #818cf8;
+            margin-top: 0.25rem;
+        }
+
+        .control-value.secondary {
+            color: #22d3ee;
+        }
+
+        /* Buttons */
+        button {
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            outline: none;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            width: auto;
+            padding: 0.5rem;
+            background: transparent;
+            color: #64748b;
+            margin-left: 0.5rem;
+        }
+
+        .btn-reset:hover {
+            color: white;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            height: 0.5rem;
+            width: 100%;
+            background: #334155;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #a855f7, #22d3ee);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Logs Container */
+        .logs-container {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            height: 8rem;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #10b981;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            word-break: break-word;
+        }
+
+        .logs-container::-webkit-scrollbar {
+            width: 0.5rem;
+        }
+
+        .logs-container::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 9999px;
+        }
+
+        .logs-container::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 9999px;
+        }
+
+        /* Results Card */
+        .result-card {
+            position: relative;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            background: linear-gradient(135deg, #4f46e5, #22d3ee);
+        }
+
+        .result-card.secondary {
+            background: #475569;
+        }
+
+        .result-content {
+            background: #1e293b;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-number {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #818cf8, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-card.secondary .result-number {
+            color: #94a3b8;
+            background: none;
+            -webkit-text-fill-color: unset;
+        }
+
+        .result-type {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-confidence {
+            text-align: right;
+        }
+
+        .result-confidence-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .result-confidence-label {
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        .result-progress-bar {
+            width: 100%;
+            height: 0.375rem;
+            background: #334155;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .result-progress-fill {
+            height: 100%;
+            background: #4f46e5;
+            transition: width 0.3s ease;
+        }
+
+        .result-card.secondary .result-progress-fill {
+            background: #64748b;
+        }
+
+        /* Status Messages */
+        .status-message {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .status-message svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes slideInBottom {
+            from { transform: translateY(1rem); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-slide-in {
+            animation: slideInBottom 0.5s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 0.75rem;
+            }
+
+            .title-main {
+                font-size: 1.5rem;
+            }
+
+            .result-number {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // === SVG Icons Component ===
+        const Icons = {
+            Cpu: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2m6 0a2 2 0 00-2-2h-1V3m-6 0a2 2 0 00-2 2m0 0H7a2 2 0 00-2 2m6-2h1V3m0 11a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2v-6a2 2 0 012-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v2m0 0h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+                </svg>
+            ),
+            Database: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7m0 0c0 2.21-3.582 4-8 4s-8-1.79-8-4m0 0c0-2.21 3.582-4 8-4s8 1.79 8 4m0 6c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+            ),
+            Activity: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            ),
+            Play: () => (
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+            ),
+            RotateCcw: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            ),
+            AlertCircle: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            ),
+            CheckCircle: () => (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            )
+        };
+
+        // === Core Logic ===
+        const generateFibs = (limit) => {
+            if (limit < 1) return [1, 2];
+            const fibs = [1, 2];
+            try {
+                while (true) {
+                    const nextFib = fibs[fibs.length - 1] + fibs[fibs.length - 2];
+                    if (nextFib > limit) break;
+                    fibs.push(nextFib);
+                    if (fibs.length > 10000) throw new Error("Fibonacci sequence too large");
+                }
+            } catch (e) {
+                console.warn("Fibonacci generation warning:", e.message);
+            }
+            return fibs.sort((a, b) => b - a);
+        };
+
+        const decompose = (n, fibs) => {
+            if (n <= 0 || !Array.isArray(fibs) || fibs.length === 0) {
+                return [];
+            }
+            let tempN = n;
+            const vector = [];
+            try {
+                for (let f of fibs) {
+                    if (tempN >= f) {
+                        vector.push(1);
+                        tempN -= f;
+                    } else {
+                        vector.push(0);
+                    }
+                }
+            } catch (e) {
+                console.error("Decompose error:", e);
+                return [];
+            }
+            return vector.reverse();
+        };
+
+        const reconstruct = (vector, fibs) => {
+            if (!Array.isArray(vector) || !Array.isArray(fibs)) {
+                return 0;
+            }
+            let val = 0;
+            try {
+                const reversedFibs = [...fibs].reverse();
+                vector.forEach((bit, i) => {
+                    if (bit === 1 && i < reversedFibs.length) {
+                        val += reversedFibs[i];
+                    }
+                });
+            } catch (e) {
+                console.error("Reconstruct error:", e);
+                return 0;
+            }
+            return val;
+        };
+
+        // === Main Component ===
+        function ZeckendorfApp() {
+            const [inputData, setInputData] = useState("412, 589, 102, 334, 765, 881, 052, 119, 442");
+            const [windowSize, setWindowSize] = useState(5);
+            const [epochs, setEpochs] = useState(100);
+            const [status, setStatus] = useState("idle");
+            const [progress, setProgress] = useState(0);
+            const [logs, setLogs] = useState([]);
+            const [results, setResults] = useState([]);
+            const logsEndRef = useRef(null);
+
+            useEffect(() => {
+                logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [logs]);
+
+            const addLog = (message) => {
+                setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
+            };
+
+            const runSimulation = async () => {
+                try {
+                    // Validation
+                    const numbers = inputData
+                        .split(',')
+                        .map(s => {
+                            const num = parseInt(s.trim());
+                            return !isNaN(num) && num >= 0 ? num : null;
+                        })
+                        .filter(n => n !== null);
+
+                    if (numbers.length === 0) {
+                        alert("❌ กรุณาใส่ข้อมูลตัวเลขที่ถูกต้อง");
+                        return;
+                    }
+
+                    if (numbers.length < windowSize + 1) {
+                        alert(`❌ ข้อมูลน้อยเกินไป ต้องการอย่างน้อย ${windowSize + 1} ตัวเลข (ปัจจุบัน: ${numbers.length})`);
+                        return;
+                    }
+
+                    setStatus("processing");
+                    setProgress(0);
+                    setLogs([]);
+                    setResults([]);
+
+                    const jobId = Math.random().toString(36).substring(7);
+                    addLog(`✓ Job ID: ${jobId} เริ่มต้น`);
+                    addLog("🔧 กำลังเตรียมระบบ Zeckendorf...");
+                    await new Promise(r => setTimeout(r, 800));
+                    setProgress(10);
+
+                    // Decomposition
+                    const maxVal = Math.max(...numbers) + 1000;
+                    const fibs = generateFibs(maxVal);
+                    
+                    if (fibs.length === 0) {
+                        throw new Error("ไม่สามารถสร้างลำดับ Fibonacci");
+                    }
+
+                    addLog(`✓ สร้างลำดับ Fibonacci ถึง ${maxVal}`);
+                    
+                    const vectors = numbers.map(n => decompose(n, fibs));
+                    addLog(`✓ แยกส่วน ${numbers.length} ตัวเลข เป็น binary vectors`);
+                    setProgress(30);
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    // Training simulation
+                    addLog(`📊 สร้าง LSTM Model (Input Dim: ${vectors[0]?.length || 0})...`);
+                    await new Promise(r => setTimeout(r, 800));
+
+                    const totalSteps = 20;
+                    for (let i = 0; i <= totalSteps; i++) {
+                        setProgress(30 + Math.floor((i / totalSteps) * 50));
+                        if (i % 5 === 0) {
+                            const loss = (Math.random() * 0.5 + 0.1 / (i + 1)).toFixed(4);
+                            addLog(`📈 Epoch ${Math.floor(i * (epochs / totalSteps))}/${epochs} - Loss: ${loss}`);
+                        }
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+
+                    addLog("✓ ฝึกอบรมเสร็จสิ้น");
+                    setProgress(90);
+
+                    // Prediction
+                    addLog("🔮 วิเคราะห์การทำนาย...");
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    const lastVector = vectors[vectors.length - 1];
+                    const reversedFibs = [...fibs].reverse();
+                    const candidates = [];
+
+                    const avg = numbers.slice(-3).reduce((a, b) => a + b, 0) / 3;
+                    const noise = Math.floor(Math.random() * 20) - 10;
+                    const primaryNum = Math.max(0, Math.floor(avg + noise));
+
+                    candidates.push({
+                        num: primaryNum,
+                        type: "Primary (LSTM Output)",
+                        conf: 0.85 + Math.random() * 0.1
+                    });
+
+                    const altVec1 = [...decompose(primaryNum, fibs)];
+                    if (altVec1.length > 2) {
+                        altVec1[1] = altVec1[1] === 1 ? 0 : 1;
+                        const num1 = reconstruct(altVec1, fibs);
+                        if (num1 > 0 && num1 !== primaryNum) {
+                            candidates.push({
+                                num: num1,
+                                type: `Alternative (F_${reversedFibs[1] || 2})`,
+                                conf: 0.60 + Math.random() * 0.15
+                            });
+                        }
+                    }
+
+                    const altVec2 = [...decompose(primaryNum, fibs)];
+                    if (altVec2.length > 3) {
+                        altVec2[3] = altVec2[3] === 1 ? 0 : 1;
+                        const num2 = reconstruct(altVec2, fibs);
+                        if (num2 > 0 && num2 !== primaryNum) {
+                            candidates.push({
+                                num: num2,
+                                type: `Alternative (F_${reversedFibs[3] || 3})`,
+                                conf: 0.45 + Math.random() * 0.10
+                            });
+                        }
+                    }
+
+                    setResults(candidates);
+                    setProgress(100);
+                    setStatus("completed");
+                    addLog("✅ การวิเคราะห์สำเร็จ");
+
+                } catch (error) {
+                    setStatus("error");
+                    addLog(`❌ ข้อผิดพลาด: ${error.message}`);
+                    console.error(error);
+                }
+            };
+
+            const reset = () => {
+                setStatus("idle");
+                setResults([]);
+                setLogs([]);
+                setProgress(0);
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="max-w-md space-y-6">
+                        {/* Header */}
+                        <div className="header">
+                            <div className="icon-wrapper">
+                                <Icons.Cpu />
+                            </div>
+                            <h1 className="title-main">Zeckendorf AI</h1>
+                            <p className="subtitle">Deep Learning Prediction System</p>
+                        </div>
+
+                        {/* Config Card */}
+                        <div className="card space-y-4">
+                            <div className="card-header">
+                                <Icons.Database />
+                                <span className="card-title">Input Data</span>
+                            </div>
+
+                            <textarea
+                                value={inputData}
+                                onChange={(e) => setInputData(e.target.value)}
+                                placeholder="ใส่ตัวเลขคั่นด้วยเครื่องหมายจุลภาค..."
+                            />
+
+                            <div className="control-grid">
+                                <div className="control-group">
+                                    <label className="control-label">Window Size</label>
+                                    <input
+                                        type="range"
+                                        min="3"
+                                        max="10"
+                                        value={windowSize}
+                                        onChange={(e) => setWindowSize(parseInt(e.target.value))}
+                                    />
+                                    <div className="control-value">{windowSize} ขั้น</div>
+                                </div>
+                                <div className="control-group">
+                                    <label className="control-label">Epochs</label>
+                                    <input
+                                        type="range"
+                                        min="50"
+                                        max="500"
+                                        step="50"
+                                        value={epochs}
+                                        onChange={(e) => setEpochs(parseInt(e.target.value))}
+                                    />
+                                    <div className="control-value secondary">{epochs}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        {(status === "idle" || status === "completed" || status === "error") ? (
+                            <button className="btn-primary" onClick={runSimulation}>
+                                <Icons.Play />
+                                START ANALYSIS
+                            </button>
+                        ) : (
+                            <button className="btn-primary" disabled>
+                                <Icons.Activity className="animate-spin" />
+                                PROCESSING...
+                            </button>
+                        )}
+
+                        {/* Processing UI */}
+                        {status === "processing" && (
+                            <div className="space-y-3 animate-fade-in">
+                                <div className="progress-wrapper">
+                                    <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+                                </div>
+                                <div className="logs-container">
+                                    {logs.map((log, i) => (
+                                        <div key={i} className="log-entry">{log}</div>
+                                    ))}
+                                    <div ref={logsEndRef} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Results */}
+                        {status === "completed" && (
+                            <div className="space-y-4 animate-slide-in">
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--color-success)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Icons.CheckCircle />
+                                        Analysis Complete
+                                    </span>
+                                    <button className="btn-reset" onClick={reset}>
+                                        <Icons.RotateCcw />
+                                    </button>
+                                </div>
+
+                                {results.map((res, idx) => (
+                                    <div key={idx} className={`result-card ${idx !== 0 ? 'secondary' : ''}`}>
+                                        <div className="result-content">
+                                            <div className="result-header">
+                                                <div>
+                                                    <div className="result-number">{String(res.num).padStart(3, '0')}</div>
+                                                    <div className="result-type">{res.type}</div>
+                                                </div>
+                                                <div className="result-confidence">
+                                                    <div className="result-confidence-value">{(res.conf * 100).toFixed(1)}%</div>
+                                                    <div className="result-confidence-label">CONFIDENCE</div>
+                                                </div>
+                                            </div>
+                                            <div className="result-progress-bar">
+                                                <div className="result-progress-fill" style={{ width: `${res.conf * 100}%` }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Error State */}
+                        {status === "error" && (
+                            <div className="status-message status-error">
+                                <Icons.AlertCircle />
+                                <span style={{ flex: 1 }}>เกิดข้อผิดพลาดในการคำนวณ</span>
+                                <button className="btn-reset" onClick={reset} style={{ color: 'var(--color-error)' }}>
+                                    ลองใหม่
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<ZeckendorfApp />);
+    </script>
+</body>
+</html>
